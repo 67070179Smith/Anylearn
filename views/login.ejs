@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anylearn</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <style>
+        body {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f6f4f4;
+        }
+
+        #content {
+            width: 70%;
+            margin: 0 auto;
+            text-align: center;
+            box-shadow: 2px 2px 2px 2px lightgray;
+            border-radius: 10px;
+            background-color: white;
+
+            .form-group {
+                text-align: left;
+                width: 80%;
+                margin: 20px auto;
+            }
+
+
+        }
+
+        button {
+            width: 80%;
+            margin-bottom: 20px;
+        }
+
+        #forRegis {
+            margin: 0 auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="content">
+        <h1>Login</h1>
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="username">Username or Email:</label>
+                <input type="text" class="form-control" placeholder="Enter your username or email" required name="username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" placeholder="Enter your password..." required
+                    name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <form action="/guest" method="post">
+            <button type="submit" class="btn btn-light">Continue as Guest</button>
+        </form>
+        <div id="forRegis">
+            <p>Don't have account? <a href="/register" type="submit"> Register here</a></p>
+        </div>
+    </div>
+</body>
+
+</html>
