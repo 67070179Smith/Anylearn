@@ -39,6 +39,16 @@
             width: 80%;
             margin: 20px auto;
         }
+
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 1px solid #f5c2c7;
+            font-size: 14px;
+        }
     </style>
 </head>
 
@@ -63,11 +73,13 @@
                 <input type="password" class="form-control" placeholder="Confirm your password" required
                     name="cfmpassword">
             </div>
-            <div class="form-check"> <label for="role">Role:</label> <input type="radio" name="role" id="Learner"
-                    value="learner"> <label for="learner">Learner</label> <input type="radio" name="role" id="Teacher"
-                    value="teacher"> <label for="teacher">Teacher</label> </div>
             <button type="submit" class="btn btn-success">Register</button>
         </form>
+        <% if (error) { %>
+            <div class="<%= error ? 'error' : '' %>">
+                <%= error %>
+            </div>
+            <% } %>
     </div>
 </body>
 

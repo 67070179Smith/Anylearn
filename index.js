@@ -87,7 +87,7 @@ db.run(usersCreateSQL, (err) => {
             db.run(topicsCreateSQL, (err) => {
                 if (err) throw err;
                 console.log("Topics table created");
-                
+
                 const contentsCreateSQL = `
                     CREATE TABLE IF NOT EXISTS contents (
                     content_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -103,7 +103,7 @@ db.run(usersCreateSQL, (err) => {
                 db.run(contentsCreateSQL, (err) => {
                     if (err) throw err;
                     console.log("Contents table created");
-                    
+
                     const enrollmentCreateSQL = `
                         CREATE TABLE IF NOT EXISTS enrollments (
                         enroll_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -131,51 +131,81 @@ app.get("/", (req, res) => {
     res.render("login", { error: null, username: "" });
 });
 app.post("/login", (req, res) => {
-  const { username, password } = req.body;
+    const { username, password } = req.body;
 
-  const sql = "SELECT * FROM users WHERE username = ?";
+    const sql = "SELECT * FROM users WHERE username = ?";
 
-  db.get(sql, [username], async (err, user) => {
-    if (err) return res.send("Database error");
+    db.get(sql, [username], async (err, user) => {
+        if (err) return res.send("Database error");
 
-    if (!user) {
-      return res.render("login", {
-        error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
-        username: username
-      });
-    }
+        if (!user) {
+            return res.render("login", {
+                error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+                username: username
+            });
+        }
 
-    const match = await bcrypt.compare(password, user.password);
+        const match = await bcrypt.compare(password, user.password);
 
-    if (!match) {
-      return res.render("login", {
-        error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
-        username: username
-      });
-    }
+        if (!match) {
+            return res.render("login", {
+                error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+                username: username
+            });
+        }
 
-    req.session.user_id = user.user_id;
-    req.session.role = user.role;
+        req.session.user_id = user.user_id;
+        req.session.role = user.role;
 
-    res.redirect("/dashboard");
-  });
+        res.redirect("/dashboard");
+    });
 });
 
 app.get('/register', (req, res) => {
-    res.render("registration");
+    res.render("registration", { error: null});
 });
 app.post('/register', (req, res) => {
-    const { username, email, password, cfmpassword, role } = req.body;
+    const { username, email, password, cfmpassword } = req.body;
     const chkUpper = /[A-Z]/.test(password);
     const chkLower = /[a-z]/.test(password);
     const chkNum = /[0-9]/.test(password);
     const chkExtra = /[^A-Za-z0-9]/.test(password);
     const chkEmail = /^.+@.+\.com$/.test(email);
-    if (!chkUpper || !chkLower || !chkNum || !chkExtra || password.length < 8) {
-        return res.send("Password ต้องมีความยาวอย่างน้อย 8 ตัวอักษร มีตัวเลข ตัวพิมใหญ่ พิมพ์เล็กและอักขระพิเศษอย่างน้อย 1 ตัวอักษร");
+    if (!chkUpper) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว",
+        });
     }
-    if (!chkEmail) return res.send("Email ไม่ถูกต้อง");
-    if (cfmpassword != password) return res.send("Password ไม่เหมือนกัน");
+    if(!chkLower) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว",
+        });
+    }
+    if(!chkExtra) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว",
+        });
+    }
+    if(!chkNum) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว",
+        });
+    }
+    if(password.length < 8) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร",
+        });
+    }
+    if (!chkEmail) {
+        return res.render("registration", {
+            error: "Email ไม่ถูกต้อง",
+        });
+    }
+    if (cfmpassword != password) {
+        return res.render("registration", {
+            error: "รหัสผ่านไม่ตรงกัน",
+        });
+    }
 
     const sql = `
         SELECT user_id FROM users
@@ -190,7 +220,7 @@ app.post('/register', (req, res) => {
             INSERT INTO users(username, password, email, role)
             VALUES (?,?,?,?);
         `;
-        db.run(sql, [username, hashedPwd, email, role], (err) => {
+        db.run(sql, [username, hashedPwd, email, "learner"], (err) => {
             if (err) return res.send("Error");
             res.redirect("/");
         });
