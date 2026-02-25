@@ -162,7 +162,7 @@ app.post("/login", (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-    res.render("registration", { error: null});
+    res.render("registration", { error: null, username: "", email: "", password: "", chkpassword: "" });
 });
 app.post('/register', (req, res) => {
     const { username, email, password, cfmpassword } = req.body;
@@ -171,39 +171,76 @@ app.post('/register', (req, res) => {
     const chkNum = /[0-9]/.test(password);
     const chkExtra = /[^A-Za-z0-9]/.test(password);
     const chkEmail = /^.+@.+\.com$/.test(email);
-    if (!chkUpper) {
+    if(username === "" || email === "" || password === "" || chkpassword === "") {
         return res.render("registration", {
-            error: "รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว",
-        });
-    }
-    if(!chkLower) {
-        return res.render("registration", {
-            error: "รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว",
-        });
-    }
-    if(!chkExtra) {
-        return res.render("registration", {
-            error: "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว",
-        });
-    }
-    if(!chkNum) {
-        return res.render("registration", {
-            error: "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว",
-        });
-    }
-    if(password.length < 8) {
-        return res.render("registration", {
-            error: "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร",
+            error: "โปรดกรอกข้อมูลให้ครบ",
+            username: username,
+            email: email,
+            password: password,
+            chkpassword: cfmpassword
         });
     }
     if (!chkEmail) {
         return res.render("registration", {
             error: "Email ไม่ถูกต้อง",
+            username: username,
+            email: "",
+            password: "",
+            chkpassword: cfmpassword
+        });
+    }
+    if (!chkUpper) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
+        });
+    }
+    if (!chkLower) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
+        });
+    }
+    if (!chkExtra) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
+        });
+    }
+    if (!chkNum) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
+        });
+    }
+    if (password.length < 8) {
+        return res.render("registration", {
+            error: "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
         });
     }
     if (cfmpassword != password) {
         return res.render("registration", {
             error: "รหัสผ่านไม่ตรงกัน",
+            username: username,
+            email: email,
+            password: "",
+            chkpassword: ""
         });
     }
 
@@ -213,9 +250,17 @@ app.post('/register', (req, res) => {
     `;
     db.get(sql, [username, email], async (err, data) => {
         if (err) return res.send("Error");
-        if (data) return res.send("Username นี้ถูกใช้แล้ว");
+        if (data) {
+            return res.render("registration", {
+                error: "Username นี้ถูกใช้แล้ว",
+                username: "",
+                email: email,
+                password: "",
+                chkpassword: ""
+            });
+        }
 
-        const hashedPwd = await bcrypt.hash(password, 5);
+        const hashedPwd = await bcrypt.hash("", 5);
         const sql = `
             INSERT INTO users(username, password, email, role)
             VALUES (?,?,?,?);
