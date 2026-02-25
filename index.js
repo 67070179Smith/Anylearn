@@ -260,7 +260,7 @@ app.post('/register', (req, res) => {
             });
         }
 
-        const hashedPwd = await bcrypt.hash("", 5);
+        const hashedPwd = await bcrypt.hash(password, 5);
         const sql = `
             INSERT INTO users(username, password, email, role)
             VALUES (?,?,?,?);
