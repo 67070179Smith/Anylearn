@@ -1,0 +1,70 @@
+body {
+    margin: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
+    font-family: Arial, sans-serif;
+}
+
+#content {
+    width: 400px;
+    padding: 30px 25px;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    background-color: white;
+}
+
+h2 {
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+input {
+    width: 100%;
+    padding: 10px 12px;
+    margin: 10px 0;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    transition: 0.2s ease;
+}
+
+input:focus {
+    border-color: #0d6efd;
+    outline: none;
+    box-shadow: 0 0 5px rgba(13, 110, 253, 0.3);
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 6px;
+    border: none;
+    background-color: #0d6efd;
+    color: white;
+    font-weight: 500;
+    transition: 0.2s ease;
+}
+
+button:hover {
+    background-color: #0b5ed7;
+}
+
+/* 🔥 กล่องแจ้งเตือน */
+.error {
+    background-color: #f8d7da;
+    color: #842029;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    border: 1px solid #f5c2c7;
+    font-size: 14px;
+}
+
+#forRegis {
+    margin-top: 15px;
+    font-size: 14px;
+}

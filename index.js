@@ -127,34 +127,41 @@ db.run(usersCreateSQL, (err) => {
 });
 
 // Routing
-app.get("/", (res) => {
-    res.render('login');
+app.get("/", (req, res) => {
+    res.render("login", { error: null, username: "" });
 });
 app.post("/login", (req, res) => {
-    const { username, password } = req.body;
-    const sql = `
-        SELECT * FROM users
-        WHERE username = ? OR email = ?
-    `;
+  const { username, password } = req.body;
 
-    db.get(sql, [username, username], async (err, userData) => {
-        if (err) return res.send("Error");
-        if (!userData) return res.send("ไม่พบผู้ใช้");
+  const sql = "SELECT * FROM users WHERE username = ?";
 
-        const chkPasswd = await bcrypt.compare(password, userData.password);
-        if (!chkPasswd) return res.send("รหัสผ่านผิด");
+  db.get(sql, [username], async (err, user) => {
+    if (err) return res.send("Database error");
 
-        req.session.user = {
-            id: userData.user_id,
-            username: userData.username,
-            role: userData.role
-        }
+    if (!user) {
+      return res.render("login", {
+        error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+        username: username
+      });
+    }
 
-        res.redirect("/dashboard")
-    });
+    const match = await bcrypt.compare(password, user.password);
+
+    if (!match) {
+      return res.render("login", {
+        error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง",
+        username: username
+      });
+    }
+
+    req.session.user_id = user.user_id;
+    req.session.role = user.role;
+
+    res.redirect("/dashboard");
+  });
 });
 
-app.get('/register', (res) => {
+app.get('/register', (req, res) => {
     res.render("registration");
 });
 app.post('/register', (req, res) => {
