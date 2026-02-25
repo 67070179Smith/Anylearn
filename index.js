@@ -171,7 +171,7 @@ app.post('/register', (req, res) => {
     const chkNum = /[0-9]/.test(password);
     const chkExtra = /[^A-Za-z0-9]/.test(password);
     const chkEmail = /^.+@.+\.com$/.test(email);
-    if(username === "" || email === "" || password === "" || chkpassword === "") {
+    if(username === "" || email === "" || password === "" || cfmpassword === "") {
         return res.render("registration", {
             error: "โปรดกรอกข้อมูลให้ครบ",
             username: username,
