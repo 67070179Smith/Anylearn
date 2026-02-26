@@ -155,10 +155,18 @@ app.post("/login", (req, res) => {
         }
 
         req.session.user_id = user.user_id;
+        req.session.username = user.username;
         req.session.role = user.role;
 
         res.redirect("/dashboard");
     });
+});
+
+app.post("/guest", (req, res) => {
+    req.session.user_id = null;
+    req.session.username = "Guest";
+    req.session.role = "guest";
+    res.redirect("/dashboard");
 });
 
 app.get('/register', (req, res) => {
@@ -269,6 +277,23 @@ app.post('/register', (req, res) => {
             if (err) return res.send("Error");
             res.redirect("/");
         });
+    });
+});
+
+app.get('/dashboard', (req, res) => {
+    if (!req.session.role) return res.redirect('/');
+
+    const viewRole = req.session.role === "learner" ? "student" : req.session.role;
+    res.render("dashboard", {
+        username: req.session.username || "Guest",
+        role: viewRole,
+        courses: []
+    });
+});
+
+app.post("/logout", (req, res) => {
+    req.session.destroy(() => {
+        res.redirect("/");
     });
 });
 

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anylearn Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/dashboard.css">
+</head>
+<body>
+    <header class="top">
+        <div class="brand">Anylearn</div>
+        <div class="top-right">
+            <span><%= username %></span>
+            <span class="pill"><%= role %></span>
+        </div>
+    </header>
+    <div class="layout">
+        <aside class="sidebar">
+            <button class="nav-btn active">HM</button>
+            <button class="nav-btn">CR</button>
+            <button class="nav-btn">CL</button>
+            <button class="nav-btn">PR</button>
+            <button class="nav-btn">ST</button>
+        </aside>
+        <section class="content">
+            <div class="panel summary">
+                <h2>Welcome, <%= username %></h2>
+                <span class="chip">Role: <%= role %></span>
+                <span class="chip">Courses: <%= courses.length %></span>
+                <div class="clock">
+                    <div>Server: <strong id="serverTime">--:--:--</strong></div>
+                    <div>Local: <strong id="localTime">--:--:--</strong></div>
+                </div>
+            </div>
+            <div class="panel toolbar">
+                <label class="search">
+                    <input type="text" placeholder="Search (UI only)">
+                </label>
+                <button class="small-btn" type="button">Sort: Latest</button>
+                <form action="/logout" method="post">
+                    <button class="logout-btn" type="submit">Logout</button>
+                </form>
+            </div>
+            <div class="panel courses">
+                <% if (!courses || courses.length === 0) { %>
+                    <div class="empty">
+                        <% if (role === "teacher") { %>
+                            You have no courses yet.
+                        <% } else if (role === "student") { %>
+                            You are not enrolled in any course yet.
+                        <% } else { %>
+                            Guest mode has no course data.
+                        <% } %>
+                    </div>
+                <% } %>
+                <% if (courses && courses.length > 0) { %>
+                    <% courses.forEach((course) => { %>
+                        <article class="card">
+                            <h3 class="title"><%= course.title %></h3>
+                            <p class="desc"><%= course.description || "No description" %></p>
+                            <div class="meta-row">
+                                <span>ID: <%= course.course_id %></span>
+                                <% if (role === "student") { %>
+                                    <span>Teacher: <%= course.teacher_name || "-" %></span>
+                                <% } %>
+                                <% if (role === "teacher") { %>
+                                    <span>Students: <%= course.student_count || 0 %></span>
+                                    <span>Topics: <%= course.topic_count || 0 %></span>
+                                <% } %>
+                            </div>
+                            <span class="tag"><%= role %></span>
+                        </article>
+                    <% }) %>
+                <% } %>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        function updateClock() {
+            const now = new Date();
+            const timeText = now.toLocaleTimeString("en-GB");
+            document.getElementById("serverTime").textContent = timeText;
+            document.getElementById("localTime").textContent = timeText;
+        }
+        updateClock();
+        setInterval(updateClock, 1000);
+    </script>
+</body>
+</html>
