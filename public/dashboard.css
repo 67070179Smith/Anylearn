@@ -25,6 +25,33 @@ body {
     padding: 0 18px;
     box-shadow: 0 8px 18px rgba(20, 71, 150, 0.25);
 }
+.top-btn {
+    border: 1px solid var(--line);
+    background-color: #2f73da;
+    border-radius: 3px;
+    min-height: 38px;
+    padding: 0 10px;
+    font-family: inherit;
+    font-weight: 600;
+    color: white;
+}
+.top-btn:hover {
+    background-color: #2c76e6;
+    cursor: pointer;
+}
+.top-btn:focus {
+    background-color: #1a69e0;
+    cursor: grab;
+}
+.dropdown-toggle {
+    background-color: #2f73da;
+    border: 1px solid var(--line);
+}
+.dropdown-toggle:hover {
+    background-color: #2c76e6;
+    border: 1px solid var(--line);
+    cursor: pointer;
+}
 .brand {
     font-weight: 800;
     letter-spacing: .3px;
@@ -149,6 +176,9 @@ body {
     font-family: inherit;
     font-weight: 700;
     cursor: pointer;
+}
+.logout-btn:hover {
+    background: linear-gradient(120deg, #ff755f, #f84429);
 }
 .courses {
     padding: 8px;
