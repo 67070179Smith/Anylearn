@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet"
+href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/admin.css">
+
+</head>
+
+<body class="container mt-4">
+
+<header class="top">
+        <div class="brand">Anylearn</div>
+        <div class="toclass">
+            <href>Admin Dashboard</href>
+        </div>
+        <div class="top-right">
+            <span class="pill"><%= role %></span>
+                <div class="dropdown">
+                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <%= username %>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="/profile">ข้อมูลส่วนตัว</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form action="/admin/logout" method="POST" class="m-0">
+                                <button type="submit" class="dropdown-item">ออกจากระบบ</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+        </div>
+    </header>
+
+    <br>
+
+
+<h1>Users</h1>
+
+<form method="GET" action="/admin">
+
+<input
+type="text"
+name="user_search"
+placeholder="Search user..."
+value="<%= user_search %>"
+>
+
+<select name="user_sort">
+<option value="user_id_desc" <%= user_sort==="user_id_desc"?"selected":"" %>>ล่าสุด</option>
+<option value="user_id_asc" <%= user_sort==="user_id_asc"?"selected":"" %>>เก่าที่สุด</option>
+<option value="date_desc" <%= user_sort==="date_desc"?"selected":"" %>>วันที่ล่าสุด</option>
+<option value="date_asc" <%= user_sort==="date_asc"?"selected":"" %>>วันที่เก่าที่สุด</option>
+<option value="username_asc" <%= user_sort==="username_asc"?"selected":"" %>>ชื่อ A-Z</option>
+<option value="username_desc" <%= user_sort==="username_desc"?"selected":"" %>>ชื่อ Z-A</option>
+<option value="learner" <%= user_sort==="learner"?"selected":"" %>>Learner</option>
+<option value="teacher" <%= user_sort==="teacher"?"selected":"" %>>Teacher</option>
+<option value="admin" <%= user_sort==="admin"?"selected":"" %>>Admin</option>
+</select>
+
+<!-- preserve logs state -->
+
+<input type="hidden" name="log_search" value="<%= log_search %>">
+<input type="hidden" name="log_sort" value="<%= log_sort %>">
+
+<button class="btn btn-primary btn-sm">Apply</button>
+
+</form>
+
+<br>
+
+<div class="table-wrapper">
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>ชื่อผู้ใช้</th>
+<th>อีเมล</th>
+<th>ประเภท</th>
+<th>วันที่สร้าง</th>
+<th>ลบ</th>
+</tr>
+</thead>
+
+<tbody>
+
+<% users.forEach(user => { %>
+
+<tr>
+<td><%= user.user_id %></td>
+<td><%= user.username %></td>
+<td><%= user.email %></td>
+<td><%= user.role %></td>
+<td><%= user.created_at %></td>
+<td>
+<form action="/admin/delete/<%= user.user_id %>" method="POST">
+<button class="btn btn-danger btn-sm">Delete</button>
+</form>
+</td>
+</tr>
+
+<% }) %>
+
+</tbody>
+
+</table>
+
+</div>
+
+<br>
+<h1>Activity Logs</h1>
+
+<form method="GET" action="/admin">
+
+<input
+type="text"
+name="log_search"
+placeholder="Search logs..."
+value="<%= log_search %>"
+>
+
+<select name="log_sort">
+
+<option value="log_id_desc" <%= log_sort==="log_id_desc"?"selected":"" %>>ล่าสุด</option>
+<option value="log_id_asc" <%= log_sort==="log_id_asc"?"selected":"" %>>เก่าที่สุด</option>
+<option value="username_asc" <%= log_sort==="username_asc"?"selected":"" %>>ชื่อ A-Z</option>
+<option value="username_desc" <%= log_sort==="username_desc"?"selected":"" %>>ชื่อ Z-A</option>
+<option value="date_desc" <%= log_sort==="date_desc"?"selected":"" %>>วันที่ล่าสุด</option>
+<option value="date_asc" <%= log_sort==="date_asc"?"selected":"" %>>วันที่เก่าที่สุด</option>
+
+</select>
+
+<!-- preserve users state -->
+
+<input type="hidden" name="user_search" value="<%= user_search %>">
+<input type="hidden" name="user_sort" value="<%= user_sort %>">
+
+<button class="btn btn-primary btn-sm">Apply</button>
+
+</form>
+
+<br>
+
+<div class="table-wrapper">
+
+<table class="table table-bordered">
+
+<thead>
+<tr>
+<th>Log ID</th>
+<th>ชื่อผู้ใช้</th>
+<th> การใช้งาน </th>
+<th>วันที่</th>
+</tr>
+</thead>
+
+<tbody>
+
+<% logs.forEach(log => { %>
+
+<tr>
+<td><%= log.log_id %></td>
+<td><%= log.username %></td>
+<td><%= log.action %></td>
+<td><%= log.created_at %></td>
+</tr>
+
+<% }) %>
+
+</tbody>
+
+</table>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -8,12 +8,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <link rel="stylesheet" href="/dashboard.css">
+    <link rel="stylesheet" href="/css/dashboard.css">
 </head>
-<body>
+<body class="<%= role %>">
     <header class="top">
         <div class="brand">Anylearn</div>
+        <div class="toclass">
+            <href>Placeholder</href>
+        </div>
         <div class="top-right">
+            <span class="pill"><%= role %></span>
             <% if(role === "guest") { %>
                 <span>
                     <form action="/" method="get">
@@ -26,8 +30,7 @@
                     </form>
                 </span>
             <% } %>
-            <span class="pill"><%= role %></span>
-            <% if(role === "student") { %>
+            <% if(role !== "guest") { %>
                 <div class="dropdown">
                     <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <%= username %>
@@ -46,34 +49,38 @@
         </div>
     </header>
     <div class="layout">
-        <aside class="sidebar">
-            <button class="nav-btn active">HM</button>
-            <button class="nav-btn">CR</button>
-            <button class="nav-btn">CL</button>
-            <button class="nav-btn">PR</button>
-            <button class="nav-btn">ST</button>
-        </aside>
+
         <section class="content">
-            <div class="panel summary">
-                <h2>Welcome, <%= username %></h2>
-                <span class="chip">Role: <%= role %></span>
-                <span class="chip">Courses: <%= courses.length %></span>
-                <div class="clock">
-                    <div>Server: <strong id="serverTime">--:--:--</strong></div>
-                    <div>Local: <strong id="localTime">--:--:--</strong></div>
-                </div>
-            </div>
+            <h1 class="Carmen">My Course</h1>
             <div class="panel toolbar">
-                <label class="search">
-                    <input type="text" placeholder="Search (UI only)">
-                </label>
-                <button class="small-btn" type="button">Sort: Latest</button>
+                <!--แถบค้นหา-->
+                <form method="GET" action="/dashboard" class="search">
+                    <input 
+                        type="text" 
+                        name="q"
+                        placeholder="ค้นหา"
+                        value="<%= typeof query !== 'undefined' ? query : '' %>"
+                    >
+                </form>
+                <!--เพิ่มคอร์ส-->
+                <% if (role === "teacher") { %>
+                    <button class="btn create-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                        + Add Course
+                    </button>
+                <% } %>
             </div>
             <div class="panel courses">
                 <% if (!courses || courses.length === 0) { %>
                     <div class="empty">
                         <% if (role === "teacher") { %>
-                            You have no courses yet.
+                            <div class="teacher-noc">
+                                <a>
+                                    You have no courses yet.
+                                </a>
+                                <button class="btn create-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                                    + Add Course
+                                </button>
+                            </div>
                         <% } else if (role === "student") { %>
                             You are not enrolled in any course yet.
                         <% } else { %>
@@ -83,37 +90,86 @@
                 <% } %>
                 <% if (courses && courses.length > 0) { %>
                     <% courses.forEach((course) => { %>
-                        <article class="card">
-                            <h3 class="title"><%= course.title %></h3>
-                            <p class="desc"><%= course.description || "No description" %></p>
-                            <div class="meta-row">
-                                <span>ID: <%= course.course_id %></span>
-                                <% if (role === "student") { %>
-                                    <span>Teacher: <%= course.teacher_name || "-" %></span>
+
+                        <a href="/course/<%= course.course_id %>" class="course-link">
+                            <article class="card">
+
+                                <% if (course.thumbnail) { %>
+                                    <img src="<%= course.thumbnail %>" class="course-img">
                                 <% } %>
-                                <% if (role === "teacher") { %>
-                                    <span>Students: <%= course.student_count || 0 %></span>
-                                    <span>Topics: <%= course.topic_count || 0 %></span>
-                                <% } %>
-                            </div>
-                            <span class="tag"><%= role %></span>
-                        </article>
+
+                                <h3 class="title"><%= course.title %></h3>
+
+                                <div class="meta-row">
+                                    <% if (role === "teacher") { %>
+                                        <span>Students: <%= course.student_count || 0 %></span>
+                                        <span>Topics: <%= course.topic_count || 0 %></span>
+                                        <span>Created: <%= course.created_at || 0 %></span>
+                                    <% } %>
+                                </div>
+
+                                <span class="tag">Instructor: <%= course.teacher_name || "-" %></span>
+
+                            </article>
+                        </a>
                     <% }) %>
                 <% } %>
             </div>
         </section>
     </div>
 
-    <script>
-        function updateClock() {
-            const now = new Date();
-            const timeText = now.toLocaleTimeString("en-GB");
-            document.getElementById("serverTime").textContent = timeText;
-            document.getElementById("localTime").textContent = timeText;
-        }
-        updateClock();
-        setInterval(updateClock, 1000);
-    </script>
+    <!-- หน้าเพิ่มคอร์ส -->
+    <div class="modal fade" id="addCourseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+      
+                <form action="/teacher/course/create" method="POST" enctype="multipart/form-data">
+        
+                    <div class="modal-header">
+                        <h5 class="modal-title">Create New Course</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Course Thumbnail</label>
+                            <input type="file"
+                                name="thumbnail"
+                                class="form-control"
+                                accept="image/*">
+                            <div class="form-text">
+                                JPG, PNG recommended. Max 2MB.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Course Title</label>
+                            <input type="text" name="title" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea name="description" class="form-control" rows="3"></textarea>
+                        </div>
+
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            Cancel
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            Create Course
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+
 </body>
 </html>

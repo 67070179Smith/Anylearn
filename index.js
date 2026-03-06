@@ -6,6 +6,8 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const session = require('express-session');
 const bcrypt = require('bcrypt');
+const db = require("./database")
+const teacherRoutes = require("./teacher/teacherRoutes");
 
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
@@ -16,115 +18,9 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-
-// Database
-let db = new sqlite3.Database('anylearn.db', (err) => {
-    if (err) {
-        return console.error(err.message);
-    }
-    db.run("PRAGMA foreign_keys = ON");
-    console.log('Connected to the SQlite database.');
-});
-
-const usersCreateSQL = `
-    CREATE TABLE IF NOT EXISTS users (
-        user_id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL,
-        email TEXT NOT NULL UNIQUE,
-        role TEXT NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-    `
-
-db.run(usersCreateSQL, (err) => {
-    if (err) throw err;
-    console.log("Users table created");
-
-    const profilesCreateSQL = `
-        CREATE TABLE IF NOT EXISTS profiles (
-            profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL UNIQUE,
-            full_name TEXT,
-            description TEXT,
-            sex TEXT,
-            birthdate TEXT,
-            FOREIGN KEY (user_id)
-            REFERENCES users(user_id)
-            ON DELETE CASCADE 
-        );
-    `;
-
-    db.run(profilesCreateSQL, (err) => {
-        if (err) throw err;
-        console.log("Profiles table created");
-
-        const coursesCreateSQL = `
-            CREATE TABLE IF NOT EXISTS courses (
-            course_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT NOT NULL,
-            description TEXT,
-            teacher_id INTEGER NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (teacher_id) REFERENCES users(user_id) ON DELETE CASCADE
-            );
-        `;
-
-        db.run(coursesCreateSQL, (err) => {
-            if (err) throw err;
-            console.log("Courses table created");
-
-            const topicsCreateSQL = `
-                CREATE TABLE IF NOT EXISTS topics (
-                topic_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                course_id INTEGER NOT NULL,
-                title TEXT NOT NULL,
-                topic_order INTEGER DEFAULT 0,
-                FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE
-                );  
-            `;
-
-            db.run(topicsCreateSQL, (err) => {
-                if (err) throw err;
-                console.log("Topics table created");
-
-                const contentsCreateSQL = `
-                    CREATE TABLE IF NOT EXISTS contents (
-                    content_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    topic_id INTEGER NOT NULL,
-                    content_type TEXT CHECK(content_type IN ('text', 'image')) NOT NULL,
-                    content_text TEXT,
-                    image_url TEXT,
-                    content_order INTEGER DEFAULT 0,
-                    FOREIGN KEY (topic_id) REFERENCES topics(topic_id) ON DELETE CASCADE
-                    );
-                `;
-
-                db.run(contentsCreateSQL, (err) => {
-                    if (err) throw err;
-                    console.log("Contents table created");
-
-                    const enrollmentCreateSQL = `
-                        CREATE TABLE IF NOT EXISTS enrollments (
-                        enroll_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        user_id INTEGER NOT NULL,
-                        course_id INTEGER NOT NULL,
-                        enrolled_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                        FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE,
-                        FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
-                        UNIQUE(user_id, course_id) 
-                        );
-                    `;
-
-                    db.run(enrollmentCreateSQL, (err) => {
-                        if (err) throw err;
-                        console.log("Enrollment table created");
-                    });
-                });
-            });
-        });
-    });
-});
+app.use("/teacher", teacherRoutes);
+const adminRoutes = require("./admin/adminRoute");
+app.use("/admin", adminRoutes);
 
 // Routing
 app.get("/", (req, res) => {
@@ -158,9 +54,25 @@ app.post("/login", (req, res) => {
         req.session.username = user.username;
         req.session.role = user.role;
 
-        res.redirect("/dashboard");
-    });
-});
+        const log = `
+        INSERT INTO activity_logs (user_id, username, action)
+        VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            "Login"
+        ]);
+
+        if (user.role === "admin") {
+            res.redirect("/admin");
+        } 
+        else {
+            res.redirect("/dashboard");
+        }
+            });
+        });
 
 app.post("/guest", (req, res) => {
     req.session.user_id = null;
@@ -275,26 +187,160 @@ app.post('/register', (req, res) => {
         `;
         db.run(sql, [username, hashedPwd, email, "learner"], (err) => {
             if (err) return res.send("Error");
+
+            const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+            db.run(log, [
+                NULL,
+                username,
+                "User registered"
+            ]);
+
             res.redirect("/");
         });
     });
 });
 
 app.get('/dashboard', (req, res) => {
+
     if (!req.session.role) return res.redirect('/');
 
     const viewRole = req.session.role === "learner" ? "student" : req.session.role;
-    res.render("dashboard", {
-        username: req.session.username || "Guest",
-        role: viewRole,
-        courses: []
+
+    const q = req.query.q || "";
+
+    let sql;
+    let params;
+
+    if (viewRole === "teacher") {
+
+        if (q === "") {
+            // ต้องjoin ไม่ได้ใส่ชื่ออาจารย์ไว้
+            sql = `
+            SELECT courses.*, users.username AS teacher_name
+            FROM courses
+            JOIN users ON courses.teacher_id = users.user_id
+            WHERE courses.teacher_id = ?
+    `;
+            params = [req.session.user_id];
+
+        } else {
+
+            sql = `
+                SELECT courses.*, users.username AS teacher_name
+                FROM courses
+                JOIN users ON courses.teacher_id = users.user_id
+                WHERE courses.teacher_id = ?
+                AND (courses.title LIKE ? OR courses.description LIKE ?)
+            `;
+            params = [
+                req.session.user_id,
+                `%${q}%`,
+                `%${q}%`
+            ];
+
+        }
+
+    } else {
+
+        // สำหรับคอร์สที่นักเรียนสมัคร
+
+        if (q === "") {
+            sql = `
+            SELECT courses.*, users.username AS teacher_name
+            FROM enrollments
+            JOIN courses ON enrollments.course_id = courses.course_id
+            JOIN users ON courses.teacher_id = users.user_id
+            WHERE enrollments.user_id = ?
+            `;
+            params = [];
+        } else {
+            sql = `
+                SELECT courses.*, users.username AS teacher_name
+                FROM enrollments
+                JOIN courses ON enrollments.course_id = courses.course_id
+                JOIN users ON courses.teacher_id = users.user_id
+                WHERE enrollments.user_id = ?
+                AND (courses.title LIKE ? OR courses.description LIKE ?)
+            `;
+            params = [`%${q}%`, `%${q}%`];
+        }
+
+    }
+
+    db.all(sql, params, (err, courses) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Database error");
+        }
+
+        console.log(courses);
+        
+        res.render("dashboard", {
+            username: req.session.username || "Guest",
+            role: viewRole,
+            courses: courses,
+            query: q
+        });
+
     });
+
+});
+
+app.get("/course/:id", (req, res) => {
+
+    const courseId = req.params.id;
+
+    const sql = `
+        SELECT courses.*, users.username AS teacher_name
+        FROM courses
+        JOIN users ON courses.teacher_id = users.user_id
+        WHERE courses.course_id = ?
+    `;
+
+    db.get(sql, [courseId], (err, course) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Database error");
+        }
+
+        if (!course) {
+            return res.send("Course not found");
+        }
+
+        res.render("course", {
+            course: course,
+            role: req.session.role,
+            username: req.session.username
+        });
+
+    });
+
 });
 
 app.post("/logout", (req, res) => {
+
+    const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            "Logged out"
+        ]);
+
     req.session.destroy(() => {
         res.redirect("/");
     });
+
+    
 });
 
 app.listen(port, () => {

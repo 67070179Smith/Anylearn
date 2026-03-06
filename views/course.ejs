@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= course.title %></title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/dashboard.css">
+</head>
+
+<body class="<%= role %>">
+
+<header class="top">
+
+    <div class="brand">Anylearn</div>
+
+    <div class="toclass">
+        <a href="/dashboard">Dashboard</a>
+    </div>
+
+    <div class="top-right">
+
+        <span class="pill"><%= role %></span>
+
+        <% if(role === "guest") { %>
+
+            <span>
+                <form action="/" method="get">
+                    <button type="submit" class="top-btn">Login</button>
+                </form>
+            </span>
+
+            <span>
+                <form action="/register" method="get">
+                    <button type="submit" class="top-btn">Signup</button>
+                </form>
+            </span>
+
+        <% } %>
+
+        <% if(role !== "guest") { %>
+
+            <div class="dropdown">
+
+                <a class="btn btn-primary dropdown-toggle"
+                   href="#"
+                   role="button"
+                   data-bs-toggle="dropdown">
+
+                    <%= username %>
+
+                </a>
+
+                <ul class="dropdown-menu">
+
+                    <li>
+                        <a class="dropdown-item" href="/profile">
+                            ข้อมูลส่วนตัว
+                        </a>
+                    </li>
+
+                    <li><hr class="dropdown-divider"></li>
+
+                    <li>
+                        <form action="/logout" method="POST" class="m-0">
+                            <button type="submit" class="dropdown-item">
+                                ออกจากระบบ
+                            </button>
+                        </form>
+                    </li>
+
+                </ul>
+
+            </div>
+
+        <% } %>
+
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+    <section class="content">
+
+        <h1 class="Carmen"><%= course.title %></h1>
+
+        <div class="panel">
+
+            <img src="<%= course.thumbnail %>" width="300">
+
+            <p>
+                Instructor: <%= course.teacher_name %>
+            </p>
+
+            <p>
+                <%= course.description %>
+            </p>
+
+        </div>
+
+    </section>
+
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
