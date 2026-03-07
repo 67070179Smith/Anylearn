@@ -15,6 +15,11 @@ const usersCreateSQL = `
         password TEXT NOT NULL,
         email TEXT NOT NULL UNIQUE,
         role TEXT NOT NULL,
+        full_name TEXT NOT NULL,
+        description TEXT,
+        gender TEXT,
+        birthdate DATETIME,
+        profile_pic TEXT,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
     `
@@ -23,25 +28,7 @@ db.run(usersCreateSQL, (err) => {
     if (err) throw err;
     console.log("Users table created");
 
-    const profilesCreateSQL = `
-        CREATE TABLE IF NOT EXISTS profiles (
-            profile_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL UNIQUE,
-            full_name TEXT,
-            description TEXT,
-            sex TEXT,
-            birthdate TEXT,
-            FOREIGN KEY (user_id)
-            REFERENCES users(user_id)
-            ON DELETE CASCADE 
-        );
-    `;
-
-    db.run(profilesCreateSQL, (err) => {
-        if (err) throw err;
-        console.log("Profiles table created");
-
-        const coursesCreateSQL = `
+    const coursesCreateSQL = `
             CREATE TABLE IF NOT EXISTS courses (
             course_id INTEGER PRIMARY KEY AUTOINCREMENT,
             thumbnail TEXT DEFAULT '/images/default-course.jpg',
@@ -53,11 +40,11 @@ db.run(usersCreateSQL, (err) => {
             );
         `;
 
-        db.run(coursesCreateSQL, (err) => {
-            if (err) throw err;
-            console.log("Courses table created");
+    db.run(coursesCreateSQL, (err) => {
+        if (err) throw err;
+        console.log("Courses table created");
 
-            const topicsCreateSQL = `
+        const topicsCreateSQL = `
                 CREATE TABLE IF NOT EXISTS topics (
                 topic_id INTEGER PRIMARY KEY AUTOINCREMENT,
                 course_id INTEGER NOT NULL,
@@ -67,11 +54,11 @@ db.run(usersCreateSQL, (err) => {
                 );  
             `;
 
-            db.run(topicsCreateSQL, (err) => {
-                if (err) throw err;
-                console.log("Topics table created");
+        db.run(topicsCreateSQL, (err) => {
+            if (err) throw err;
+            console.log("Topics table created");
 
-                const contentsCreateSQL = `
+            const contentsCreateSQL = `
                     CREATE TABLE IF NOT EXISTS contents (
                     content_id INTEGER PRIMARY KEY AUTOINCREMENT,
                     topic_id INTEGER NOT NULL,
@@ -83,11 +70,11 @@ db.run(usersCreateSQL, (err) => {
                     );
                 `;
 
-                db.run(contentsCreateSQL, (err) => {
-                    if (err) throw err;
-                    console.log("Contents table created");
+            db.run(contentsCreateSQL, (err) => {
+                if (err) throw err;
+                console.log("Contents table created");
 
-                    const enrollmentCreateSQL = `
+                const enrollmentCreateSQL = `
                         CREATE TABLE IF NOT EXISTS enrollments (
                         enroll_id INTEGER PRIMARY KEY AUTOINCREMENT,
                         user_id INTEGER NOT NULL,
@@ -99,12 +86,12 @@ db.run(usersCreateSQL, (err) => {
                         );
                     `;
 
-                    db.run(enrollmentCreateSQL, (err) => {
-                        if (err) throw err;
-                        console.log("Enrollment table created");
-                        
+                db.run(enrollmentCreateSQL, (err) => {
+                    if (err) throw err;
+                    console.log("Enrollment table created");
 
-                        const createLogs = `
+
+                    const createLogs = `
                             CREATE TABLE IF NOT EXISTS activity_logs (
                             log_id INTEGER PRIMARY KEY AUTOINCREMENT,
                             user_id INTEGER,
@@ -113,15 +100,15 @@ db.run(usersCreateSQL, (err) => {
                             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                             FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
                             );`;
-                        db.run(createLogs, (err) => {
-                            if (err) throw err;
-                            console.log("Activity logs table created");
-                        });
+                    db.run(createLogs, (err) => {
+                        if (err) throw err;
+                        console.log("Activity logs table created");
                     });
                 });
             });
         });
     });
 });
+
 
 module.exports = db;

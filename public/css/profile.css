@@ -1,0 +1,133 @@
+:root {
+    --ink: #172129;
+    --muted: #62717f;
+    --line: #d8e0ea;
+    --paper: #ffffff;
+    --blue-1: #1e59b7;
+    --blue-2: #2f73da;
+    --bg: #edf2f8;
+    --danger: #ea5744;
+    --teacher: #6A0DAD;
+    --teacher-l: #902dd7;
+    --learner: #2E8B57;
+}
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    font-family: "Sora", sans-serif;
+    color: var(--ink);
+    background: linear-gradient(160deg, #f4f7fb 0%, var(--bg) 100%);
+}
+
+.top {
+    height: 80px;
+    background: linear-gradient(100deg, var(--blue-1), var(--blue-2));
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 18px;
+    box-shadow: 0 8px 18px rgba(20, 71, 150, 0.25);
+}
+.top-btn {
+    border: 1px solid var(--line);
+    background-color: #2f73da;
+    border-radius: 3px;
+    min-height: 38px;
+    padding: 0 10px;
+    font-family: inherit;
+    font-weight: 600;
+    color: white;
+}
+.top-btn:hover {
+    background-color: #2c76e6;
+    cursor: pointer;
+}
+.top-btn:focus {
+    background-color: #1a69e0;
+    cursor: grab;
+}
+.dropdown-toggle {
+    background-color: #2f73da;
+    border: 1px solid var(--line);
+}
+.dropdown-toggle:hover {
+    background-color: #2c76e6;
+    border: 1px solid var(--line);
+    cursor: pointer;
+}
+.dropdown-item:focus {
+    background-color: #e6e8ea;
+    color: black;
+    border: 1px solid var(--line);
+    cursor: grab;
+}
+.brand {
+    font-weight: 800;
+    letter-spacing: .3px;
+    font-size: 1.6rem;
+}
+.top-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: .9rem;
+}
+.pill {
+    border-radius: 999px;
+    padding: 5px 10px;
+    border: 1px solid rgba(255,255,255,.35);
+    text-transform: uppercase;
+    font-size: .72rem;
+    font-weight: 700;
+}
+#content {
+    display: flex;
+    width: 80%;
+    border-radius: 5px;
+    box-shadow: 1px 1px 1px 1px lightgray;
+    margin: 20px auto;
+    background-color: var(--paper);
+    padding: 30px;
+}
+#content img {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    border-radius: 5px;
+}
+form {
+    margin: 30px 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+form h1 {
+    text-align: center;
+}
+form textarea {
+    max-width: 100%;
+}
+.label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+#gender {
+    background-color: #62717f;
+}
+#saveBtn {
+    width: 30%;
+    margin: 0 auto;
+}
+#userData{
+    margin: 30px 50px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+#userData h1 {
+    text-align: center;
+}

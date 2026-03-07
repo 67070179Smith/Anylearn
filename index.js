@@ -82,10 +82,10 @@ app.post("/guest", (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-    res.render("registration", { error: null, username: "", email: "", password: "", chkpassword: "" });
+    res.render("registration", { error: null, username: "", fullname: "",email: "", password: "", chkpassword: "" });
 });
 app.post('/register', (req, res) => {
-    const { username, email, password, cfmpassword } = req.body;
+    const { username, fullname, email, password, cfmpassword } = req.body;
     const chkUpper = /[A-Z]/.test(password);
     const chkLower = /[a-z]/.test(password);
     const chkNum = /[0-9]/.test(password);
@@ -95,6 +95,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "โปรดกรอกข้อมูลให้ครบ",
             username: username,
+            fullname: fullname,
             email: email,
             password: password,
             chkpassword: cfmpassword
@@ -104,6 +105,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "Email ไม่ถูกต้อง",
             username: username,
+            fullname: fullname,
             email: "",
             password: "",
             chkpassword: cfmpassword
@@ -113,6 +115,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านต้องมีตัวพิมพ์ใหญ่อย่างน้อย 1 ตัว",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -122,6 +125,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านต้องมีตัวพิมพ์เล็กอย่างน้อย 1 ตัว",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -131,6 +135,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านต้องมีอักขระพิเศษอย่างน้อย 1 ตัว",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -140,6 +145,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านต้องมีตัวเลขอย่างน้อย 1 ตัว",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -149,6 +155,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -158,6 +165,7 @@ app.post('/register', (req, res) => {
         return res.render("registration", {
             error: "รหัสผ่านไม่ตรงกัน",
             username: username,
+            fullname: fullname,
             email: email,
             password: "",
             chkpassword: ""
@@ -174,6 +182,7 @@ app.post('/register', (req, res) => {
             return res.render("registration", {
                 error: "Username นี้ถูกใช้แล้ว",
                 username: "",
+                fullname: fullname,
                 email: email,
                 password: "",
                 chkpassword: ""
@@ -182,10 +191,10 @@ app.post('/register', (req, res) => {
 
         const hashedPwd = await bcrypt.hash(password, 5);
         const sql = `
-            INSERT INTO users(username, password, email, role)
-            VALUES (?,?,?,?);
+            INSERT INTO users(username, password, email, role, full_name, description, gender, birthdate)
+            VALUES (?,?,?,?,?,?,?,?);
         `;
-        db.run(sql, [username, hashedPwd, email, "learner"], (err) => {
+        db.run(sql, [username, hashedPwd, email, "learner", fullname, "", "", ""], (err) => {
             if (err) return res.send("Error");
 
             const log = `
@@ -194,7 +203,7 @@ app.post('/register', (req, res) => {
         `;
 
             db.run(log, [
-                NULL,
+                null,
                 username,
                 "User registered"
             ]);
@@ -324,7 +333,6 @@ app.get("/course/:id", (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-
     const log = `
             INSERT INTO activity_logs (user_id, username, action)
             VALUES (?, ?, ?)
@@ -339,8 +347,38 @@ app.post("/logout", (req, res) => {
     req.session.destroy(() => {
         res.redirect("/");
     });
+});
 
-    
+app.get('/profile', (req, res) => {
+    const sql = `SELECT * FROM users WHERE user_id = ?`
+    db.get(sql, [req.session.user_id], (err, user) => {
+        res.render('profile', {error: null, data: user, role: req.session.role});
+    });
+});
+
+app.get('/editprofile', (req, res) => {
+    const sql = `SELECT * FROM users WHERE user_id = ?`
+    db.get(sql, [req.session.user_id], (err, user) => {
+        res.render('profile_edit', {error: null, data: user, role: req.session.role});
+    });
+});
+
+app.post('/editprofile', (req,res)=>{
+    const { fullname, username, email, description, gender, birthdate, profile_pic } = req.body;
+
+    const updateSQL = `
+        UPDATE users 
+        SET full_name = ?, username = ?, email = ?, description = ?, gender = ?, birthdate = ?, profile_pic = ?
+        WHERE user_id = ?
+    `;
+
+    db.run(updateSQL,
+        [fullname, username, email, description, gender, birthdate, profile_pic, req.session.user_id],
+        (err, result)=>{
+            if(err) throw err;
+            res.redirect('/profile');
+        }
+    );
 });
 
 app.listen(port, () => {
