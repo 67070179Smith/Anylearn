@@ -75,7 +75,7 @@
             </div>
 
             <div class="form-floating">
-                <textarea class="form-control" name="description" placeholder="Write your description here" id="floatingTextarea2" style="height: 100px" readonly><%= data.description %></textarea>
+                <textarea class="form-control" name="description" placeholder="Write your description here" id="floatingTextarea2" style="height: 100px" readonly><%= data.description ? data.description : 'No data' %></textarea>
                 <label for="floatingTextarea2">Description</label>
             </div>
 
@@ -83,13 +83,13 @@
                 <span>Gender:</span>
                 <div class="dropdown">
                     <button class="btn btn-secondary">
-                        <%= data.gender %>
+                        <%= data.gender ? data.gender : 'No data' %>
                     </button>
                 </div>
             </div>
         
             <div class="label">
-                <span>Birthdate: <%= data.birthdate %></span>
+                <span>Birthdate: <%= data.birthdate ? data.birthdate : 'No data' %></span>
             </div>
 
             <a href="/editprofile" class="btn btn-success" id="saveBtn">Edit profile</a>
