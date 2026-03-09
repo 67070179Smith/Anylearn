@@ -313,7 +313,7 @@ body {
 }
 
 .create-btn{
-    background: linear-gradient(120deg, var(--teacher), var(--teacher-l));
+    background: linear-gradient(120deg, var(--blue-1), var(--blue-2));
     color: white;
 
     border: none;
@@ -330,7 +330,7 @@ body {
 
 .create-btn:hover{
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(106, 13, 173, .35);
+    box-shadow: 0 6px 14px rgba(30, 89, 183, .35);
 }
 
 .create-btn:active{
@@ -364,9 +364,9 @@ body {
 
 .feedback-btn{
     background: transparent;
-    color: var(--teacher);
+    color: var(--blue-1);
 
-    border: 2px solid var(--teacher);
+    border: 2px solid var(--blue-1);
     border-radius: 10px;
 
     min-height: 40px;
@@ -379,11 +379,11 @@ body {
 }
 
 .feedback-btn:hover{
-    background: var(--teacher);
+    background: var(--blue-1);
     color: white;
 
     transform: translateY(-1px);
-    box-shadow: 0 6px 14px rgba(106, 13, 173, .25);
+    box-shadow: 0 6px 14px rgba(30, 89, 183, .25);
 }
 
 .feedback-btn:active{
