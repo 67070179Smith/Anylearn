@@ -198,7 +198,7 @@
 
             <% if(role === "guest") { %>
 
-                <div style="padding:40px; text-align:center;">
+                <div class="access-gate">
                     <p>สมัครสมาชิกเพื่อเข้าถึงเนื้อหาคอร์ส</p>
 
                     <a href="/register" class="btn btn-primary">
@@ -208,7 +208,7 @@
 
             <% } else if(role === "learner" && !enrolled) { %>
 
-                <div style="padding:40px; text-align:center;">
+                <div class="access-gate">
                     <p>Enroll in this course to access the content</p>
 
                     <form method="POST" action="/course/<%= course.course_id %>/enroll">
@@ -374,7 +374,7 @@
             </div>
             <% if(role === "learner") { %>
 
-                <div class="mt-4 text-center">
+                <div class="mt-4 text-center feedback-cta">
 
                     <a href="#"
                     data-bs-toggle="modal"
