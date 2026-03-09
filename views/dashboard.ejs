@@ -24,12 +24,12 @@
             <% if(role === "guest") { %>
                 <span>
                     <form action="/" method="get">
-                        <button type="submit" class="top-btn">Login</button>
+                        <button type="submit" class="top-btn">เข้าสู่ระบบ</button>
                     </form>
                 </span>
                 <span>
                     <form action="/register" method="get">
-                        <button type="submit" class="top-btn">Signup</button>
+                        <button type="submit" class="top-btn">สมัครสมาชิค</button>
                     </form>
                 </span>
             <% } %>
@@ -39,8 +39,6 @@
                         <%= username %>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/profile">ข้อมูลส่วนตัว</a></li>
-                        <li><hr class="dropdown-divider"></li>
                         <li>
                             <form action="/logout" method="POST" class="m-0">
                                 <button type="submit" class="dropdown-item">ออกจากระบบ</button>
@@ -54,7 +52,13 @@
     <div class="layout">
 
         <section class="content">
-            <h1 class="Carmen">My Course</h1>
+            <h1 class="Carmen">
+                <% if (role === "teacher") { %>
+                    คอร์สที่สอนโดย <span class="usernameT"><%= username %></span>
+                <% } else { %>
+                    คอร์สเรียนของ <span class="usernameS"><%= username %></span>
+                <% } %>
+            </h1>
             <div class="panel toolbar">
                 <!--แถบค้นหา-->
                 <form method="GET" action="/dashboard" class="search">
@@ -68,15 +72,15 @@
                 <!--เพิ่มคอร์ส + ดูผลตอบรับ -->
                 <% if (role === "teacher") { %>
 
-                    <button class="btn create-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-                        + Add Course
+                    <button class="teacher-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                        + สร้างคอร์ส
                     </button>
 
-                    <button class="feedback-btn"
+                    <button class="teacher-btn"
                         data-bs-toggle="modal"
                         data-bs-target="#feedbackListModal">
 
-                        Feedback
+                        ผลตอบรับ
 
                     </button>
 
@@ -84,7 +88,7 @@
                 <% if (role === "student") { %>
 
                     <a href="/browse" class="btn browse-btn">
-                        Browse
+                        ดูคอร์ส
                     </a>
 
                 <% } %>
@@ -93,16 +97,23 @@
                 <% if (!courses || courses.length === 0) { %>
                     <div class="empty">
                         <% if (role === "teacher") { %>
-                            <div class="teacher-noc">
+                            <div class="noc-noc">
                                 <a>
-                                    You have no courses yet.
+                                    คุณยังไม่ได้สร้างคอร์ส
                                 </a>
-                                <button class="btn create-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
-                                    + Add Course
+                                <button class="teacher-btn" id="create-course-button" data-bs-toggle="modal" data-bs-target="#addCourseModal">
+                                    สร้างคอร์สเลย!
                                 </button>
                             </div>
                         <% } else if (role === "student") { %>
-                            You are not enrolled in any course yet.
+                            <div class="noc-noc">
+                                <a>
+                                    คุณยังไม่มีคอร์สเรียน
+                                </a>
+                                <a href="/browse" class="btn browse-btn">
+                                    ดูคอร์สเลย!
+                                </a>
+                            </div>
                         <% } else { %>
                             Guest mode has no course data.
                         <% } %>
@@ -123,10 +134,10 @@
                                     <h3 class="title"><%= course.title %></h3>
                                     <div class="meta-row">
                                         <% if (role === "teacher") { %>
-                                            <span>Created: <%= course.created_at || "-" %></span>
+                                            <span>สร้างเมื่อ: <%= course.created_at || "-" %></span>
                                         <% } %>
                                     </div>
-                                    <span class="tag" title="Instructor: <%= course.teacher_name || " -" %>"><%= course.teacher_name || "-" %></span>
+                                    <span class="tag" title="ผู้สอน: <%= course.teacher_name || " -" %>"><%= course.teacher_name || "-" %></span>
                                     
                                     </div>
                             </article>
@@ -145,30 +156,30 @@
                 <form action="/teacher/course/create" method="POST" enctype="multipart/form-data">
         
                     <div class="modal-header">
-                        <h5 class="modal-title">Create New Course</h5>
+                        <h5 class="modal-title">สร้างคอร์สใหม่</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
 
                     <div class="modal-body">
                         
                         <div class="mb-3">
-                            <label class="form-label">Course Thumbnail</label>
+                            <label class="form-label">ปกรูปคอร์ส</label>
                             <input type="file"
                                 name="thumbnail"
                                 class="form-control"
                                 accept="image/*">
                             <div class="form-text">
-                                JPG, PNG recommended. Max 2MB.
+                                แนะนำไฟล์สกุล .JPG, .PNG ขนาดสูงสุด 2MB
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Course Title</label>
+                            <label class="form-label">ชื่อคอร์ส</label>
                             <input type="text" name="title" class="form-control" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Description</label>
+                            <label class="form-label">คำอธิบาย</label>
                             <textarea name="description" class="form-control" rows="3"></textarea>
                         </div>
 
@@ -176,10 +187,10 @@
 
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                            Cancel
+                            ยกเลิก
                         </button>
                         <button type="submit" class="btn btn-primary">
-                            Create Course
+                            สร้างคอร์ส
                         </button>
                     </div>
 
@@ -197,7 +208,7 @@
             <div class="modal-header">
 
                 <h5 class="modal-title">
-                    Student Feedback
+                    ผลตอบรับจากนักเรียน
                 </h5>
 
                 <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -208,7 +219,7 @@
 
                 <% if(!feedbackList || feedbackList.length === 0) { %>
 
-                    <p>No feedback yet.</p>
+                    <p>ยังไม่มีผลตอบรับ</p>
 
                 <% } else { %>
 
@@ -219,18 +230,12 @@
                             <div class="d-flex justify-content-between">
 
                                 <strong>
-                                    <%= f.username %>
+                                    <%= f.course_title %>
                                 </strong>
 
                                 <small class="text-muted">
                                     <%= f.timestamp %>
                                 </small>
-
-                            </div>
-
-                            <div class="text-muted mb-1">
-
-                                Course: <%= f.course_title %>
 
                             </div>
 

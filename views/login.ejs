@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anylearn - Login</title>
+    <title>Anylearn - เข้าสู่ระบบ</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -16,8 +16,8 @@
         <section class="login-card">
             <header class="login-header">
                 <p class="brand">Anylearn</p>
-                <h1>Welcome Back</h1>
-                <p class="subtitle">Sign in to continue your learning journey.</p>
+                <h1>ยินดีต้อนรับกลับ</h1>
+                <p class="subtitle">เข้าสู่ระบบเพื่อเรียนรู้ต่อได้เลย!</p>
             </header>
 
             <% if (error) { %>
@@ -25,20 +25,20 @@
             <% } %>
 
             <form method="POST" action="/login" class="login-form">
-                <label for="username">Username</label>
-                <input id="username" type="text" name="username" value="<%= username || '' %>" placeholder="Enter your username" autocomplete="username" required>
+                <label for="username">ชื่อผู้ใช้</label>
+                <input id="username" type="text" name="username" value="<%= username || '' %>" placeholder="ชื่อผู้ใช้..." autocomplete="username" required>
 
-                <label for="password">Password</label>
-                <input id="password" type="password" name="password" placeholder="Enter your password" autocomplete="current-password" required>
+                <label for="password">รหัสผ่าน</label>
+                <input id="password" type="password" name="password" placeholder="รหัสผ่าน..." autocomplete="current-password" required>
 
-                <button type="submit" class="primary-btn">Login</button>
+                <button type="submit" class="primary-btn">เข้าสู่ระบบ</button>
             </form>
 
             <form action="/guest" method="post" class="guest-form">
-                <button type="submit" class="ghost-btn">Continue as Guest</button>
+                <button type="submit" class="ghost-btn">เข้าสู่ระบบโดยไม่ใช้บัญชี</button>
             </form>
 
-            <p class="register-link">Don't have an account? <a href="/register">Register here</a></p>
+            <p class="register-link">ไม่มีบัญชี? <a href="/register">สมัครสมาชิกตรงนี้เลย!</a></p>
         </section>
     </main>
 </body>

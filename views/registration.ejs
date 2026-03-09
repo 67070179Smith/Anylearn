@@ -16,8 +16,7 @@
         <section class="register-card">
             <header class="register-header">
                 <p class="brand">Anylearn</p>
-                <h1>Create Account</h1>
-                <p class="subtitle">Start learning by creating your account.</p>
+                <h1>สร้างบัญชีผู้ใช้</h1>
             </header>
 
             <% if (error) { %>
@@ -25,25 +24,25 @@
             <% } %>
 
             <form action="/register" method="post" class="register-form">
-                <label for="username">Username</label>
-                <input id="username" type="text" placeholder="Enter your username" name="username" value="<%= username %>" autocomplete="username">
+                <label for="username">ชื่อผู้ใช้</label>
+                <input id="username" type="text" placeholder="ชื่อผู้ใช้ของคุณ" name="username" value="<%= username %>" autocomplete="username">
 
-                <label for="fullname">Full Name</label>
-                <input id="fullname" type="text" placeholder="Enter your name" name="fullname" value="<%= fullname %>" autocomplete="fullname">
+                <label for="fullname">ชื่อจริง</label>
+                <input id="fullname" type="text" placeholder="ชื่อ-นามสกุล" name="fullname" value="<%= fullname %>" autocomplete="fullname">
 
-                <label for="email">Email</label>
-                <input id="email" type="email" placeholder="Enter your email" name="email" value="<%= email %>" autocomplete="email">
+                <label for="email">อีเมล</label>
+                <input id="email" type="email" placeholder="xxx@example.com" name="email" value="<%= email %>" autocomplete="email">
 
-                <label for="password">Password</label>
-                <input id="password" type="password" placeholder="Enter your password" name="password" value="<%= password %>" autocomplete="new-password">
+                <label for="password">รหัสผ่าน</label>
+                <input id="password" type="password" placeholder="รหัสผ่านของคุณ" name="password" value="<%= password %>" autocomplete="new-password">
 
-                <label for="cfmpassword">Confirm Password</label>
-                <input id="cfmpassword" type="password" placeholder="Confirm your password" name="cfmpassword" value="<%= chkpassword %>" autocomplete="new-password">
+                <label for="cfmpassword">ยืนยันรหัสผ่าน</label>
+                <input id="cfmpassword" type="password" placeholder="ยืนยันรหัสผ่าน" name="cfmpassword" value="<%= chkpassword %>" autocomplete="new-password">
 
-                <button type="submit">Register</button>
+                <button type="submit">สมัคร</button>
             </form>
 
-            <p class="back-login">Already have an account? <a href="/">Login here</a></p>
+            <p class="back-login">มีบัญชีอยู่แล้ว? <a href="/">เข้าสู่ระบบที่นี่เลย!</a></p>
         </section>
     </main>
 </body>

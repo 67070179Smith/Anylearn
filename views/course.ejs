@@ -61,15 +61,6 @@
             </a>
 
             <ul class="dropdown-menu">
-
-                <li>
-                    <a class="dropdown-item" href="/profile">
-                        ข้อมูลส่วนตัว
-                    </a>
-                </li>
-
-                <li><hr class="dropdown-divider"></li>
-
                 <li>
                     <form action="/logout" method="POST" class="m-0">
                         <button type="submit" class="dropdown-item">
@@ -97,9 +88,20 @@
             <form method="POST" action="/teacher/course/<%= course.course_id %>/edit" enctype="multipart/form-data">
         <% } %>
 
-        <% if (role === "teacher") { %>
 
-            <div class="course-toolbar">
+        <div class="course-toolbar">
+
+            <% if (role === "guest" || (role === "learner" && !enrolled)) { %>
+                <a href="/browse" class="back-btn">
+                    &lt; กลับ
+                </a>
+            <% } else { %>
+                <a href="/dashboard" class="back-btn">
+                    &lt; กลับ
+                </a>
+            <% } %>
+
+            <% if (role === "teacher") { %>
 
                 <% if (!editMode) { %>
 
@@ -108,14 +110,16 @@
                         data-bs-toggle="modal"
                         data-bs-target="#studentsModal">
 
-                        Students (<%= students ? students.length : 0 %>)
+                        นักเรียน (<%= students ? students.length : 0 %>)
 
                     </button>
 
                     <a href="/course/<%= course.course_id %>/edit" class="toolbar-btn">
-                        Edit
+                        แก้ไข
                     </a>
-                <% } else {%>
+
+                <% } else { %>
+
                     <button
                         type="submit"
                         class="btn btn-outline-danger"
@@ -123,12 +127,16 @@
                         formmethod="POST"
                         formnovalidate
                         onclick="return confirm('Delete this course permanently?')">
-                            Delete
-                    </button>
-                <% } %>
-            </div>
 
-        <% } %>
+                        ลบคอร์ส
+
+                    </button>
+
+                <% } %>
+
+            <% } %>
+
+        </div>
 
         <!-- COURSE HERO -->
         <div class="course-hero">
@@ -149,7 +157,7 @@
                     >
 
                     <div class="edit-thumbnail">
-                        <label for="thumbnail">Change Thumbnail</label>
+                        <label for="thumbnail">เปลี่ยนรูปปกคอร์ส</label>
                         <input id="thumbnail" type="file" name="thumbnail" accept="image/*">
                     </div>
 
@@ -160,7 +168,7 @@
                     </h1>
 
                     <p class="course-teacher">
-                        by <strong><%= course.teacher_name %></strong>
+                        โดย <strong><%= course.teacher_name %></strong>
                     </p>
 
                 <% } %>
@@ -194,32 +202,7 @@
 
         <!-- COURSE TOPICS -->
         <div class="course-topics">
-            <h2>Course Content</h2>
-
-            <% if(role === "guest") { %>
-
-                <div class="access-gate">
-                    <p>สมัครสมาชิกเพื่อเข้าถึงเนื้อหาคอร์ส</p>
-
-                    <a href="/register" class="btn btn-primary">
-                        Register
-                    </a>
-                </div>
-
-            <% } else if(role === "learner" && !enrolled) { %>
-
-                <div class="access-gate">
-                    <p>Enroll in this course to access the content</p>
-
-                    <form method="POST" action="/course/<%= course.course_id %>/enroll">
-                        <button class="btn btn-success">
-                            Enroll Now
-                        </button>
-                    </form>
-                </div>
-
-            <% } else { %>
-                <% if (editMode) { %>
+        <% if (editMode) { %>
                     <div class="course-toolbar">
                         <button
                             type="button"
@@ -227,7 +210,7 @@
                             data-bs-toggle="modal"
                             data-bs-target="#addTopicModal"
                         >
-                            Add Topic
+                            เพิ่มบท
                         </button>
 
                         <button
@@ -236,10 +219,35 @@
                             data-bs-toggle="modal"
                             data-bs-target="#manageTopicsModal"
                         >
-                            Manage Topics
+                            จัดการบทเรียน
                         </button>
                     </div>
             <% } %>
+            <h2 class="content-head-title">เนื้อหา</h2>
+
+            <% if(role === "guest") { %>
+
+                <div class="access-gate">
+                    <p>สมัครสมาชิกเพื่อเข้าถึงเนื้อหาคอร์ส</p>
+
+                    <a href="/register" class="btn btn-primary">
+                        สมัครสมาชิค
+                    </a>
+                </div>
+
+            <% } else if(role === "learner" && !enrolled) { %>
+
+                <div class="access-gate">
+                    <p>เข้าร่วมคอร์สนี้เพื่อดูเนื้อหา</p>
+
+                    <form method="POST" action="/course/<%= course.course_id %>/enroll">
+                        <button class="btn btn-success">
+                            เข้าร่วมเลย!
+                        </button>
+                    </form>
+                </div>
+
+            <% } else { %>
 
             <div class="accordion" id="topicsAccordion">
 
@@ -324,7 +332,7 @@
                                                     formmethod="POST"
                                                     formaction="/teacher/content/<%= content.content_id %>/delete"
                                                     class="btn btn-danger btn-sm">
-                                                    Delete
+                                                    ลบ
                                                 </button>
 
                                             </div>
@@ -339,7 +347,7 @@
 
                             <% } else { %>
 
-                                <p>No content yet.</p>
+                                <p class="empty-content">ยังไม่มีเนื้อหา</p>
 
                             <% } %>
                             
@@ -352,7 +360,7 @@
                                 data-bs-target="#addContentModal"
                                 data-topic-id="<%= topic.topic_id %>">
 
-                                    + Add Content
+                                    + เพิ่มเนื้อหา
 
                                 </button>
 
@@ -367,7 +375,7 @@
 
             <% } else { %>
 
-                <p>No topics yet.</p>
+                <p class="empty-content">ยังไม่มีบทเรียน</p>
 
             <% } %>
 
@@ -396,11 +404,11 @@
             <div class="edit-actions">
 
                 <button type="submit" class="save-button">
-                    Save Changes
+                    บันทึก
                 </button>
 
                 <a href="/course/<%= course.course_id %>" class="cancel-button">
-                    Cancel
+                    ยกเลิก
                 </a>
 
             </div>
@@ -420,7 +428,7 @@
             <div class="modal-header">
 
                 <h5 class="modal-title">
-                    Add Topic
+                    เพิ่มบทเรียน
                 </h5>
 
                 <button
@@ -439,7 +447,7 @@
                         type="text"
                         name="title"
                         class="form-control"
-                        placeholder="Topic name"
+                        placeholder="ชื่อบทเรียน..."
                         required
                     >
 
@@ -451,13 +459,13 @@
                         type="button"
                         class="btn btn-secondary"
                         data-bs-dismiss="modal">
-                        Cancel
+                        ยกเลิก
                     </button>
 
                     <button
                         type="submit"
                         class="btn btn-primary">
-                        Add Topic
+                        เพิ่มบทเรียน
                     </button>
 
                 </div>
@@ -476,7 +484,7 @@
 
       <div class="modal-header">
         <h5 class="modal-title">
-            Manage Topics (<%= topics.length %>)
+            จัดการบทเรียน (<%= topics.length %>)
         </h5>
 
         <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -497,9 +505,9 @@
 
               <button
                 class="btn btn-danger btn-sm"
-                onclick="return confirm('Delete this topic?')"
+                onclick="return confirm('ต้องการลบบทเรียนนี้?')"
               >
-                Delete
+                ลบ
               </button>
 
             </form>
@@ -525,7 +533,7 @@
       <div class="modal-header">
 
         <h5 class="modal-title">
-          Add Content
+          เพิ่มเนื้อหา
         </h5>
 
         <button class="btn-close" data-bs-dismiss="modal"></button>
@@ -541,15 +549,15 @@
             <input type="hidden" name="topic_id" id="contentTopicId">
             <input type="hidden" name="course_id" value="<%= course.course_id %>">
 
-          <label class="form-label">Content Type</label>
+          <label class="form-label">ประเภทเนื้อหา</label>
 
           <select id="contentType"
                   name="content_type"
                   class="form-select mb-3">
 
-            <option value="text">Text</option>
-            <option value="video">Video</option>
-            <option value="image">Image</option>
+            <option value="text">ข้อความ</option>
+            <option value="video">วิดีโอ</option>
+            <option value="image">รูปภาพ</option>
 
           </select>
 
@@ -558,7 +566,7 @@
           <div id="textGroup">
 
             <label id="textLabel" class="form-label">
-              Text
+              เนื้อหา
             </label>
 
             <input
@@ -566,7 +574,7 @@
               name="content_text"
               id="contentInput"
               class="form-control"
-              placeholder="Enter lesson text">
+              placeholder="พิมพ์เนื้อหาในนี้...">
 
           </div>
 
@@ -575,7 +583,7 @@
           <div id="imageGroup" style="display:none;">
 
             <label class="form-label">
-              Upload Image
+              อัพโหลดรูปภาพ
             </label>
 
             <input
@@ -594,13 +602,13 @@
             type="button"
             class="btn btn-secondary"
             data-bs-dismiss="modal">
-            Cancel
+            ยกเลิก
           </button>
 
           <button
             type="submit"
             class="btn btn-primary">
-            Add Content
+            เพิ่มเนื้อหา
           </button>
 
         </div>
@@ -619,7 +627,7 @@
     <div class="modal-content">
 
       <div class="modal-header">
-        <h5 class="modal-title">Enrolled Students</h5>
+        <h5 class="modal-title">นักเรียนในคอร์ส</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
 
@@ -627,7 +635,7 @@
 
         <% if (!students || students.length === 0) { %>
 
-            <p>No students enrolled yet.</p>
+            <p>ยังไม่มีนักเรียน</p>
 
         <% } else { %>
 
@@ -641,7 +649,7 @@
                         action="/teacher/course/<%= course.course_id %>/student/<%= student.user_id %>/remove">
 
                         <button class="btn btn-danger btn-sm">
-                            Remove
+                            ลบนักเรียน
                         </button>
 
                     </form>

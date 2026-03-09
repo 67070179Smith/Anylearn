@@ -40,6 +40,27 @@
     box-shadow: 0 6px 16px rgba(23, 33, 41, 0.08);
 }
 
+/* BACK BUTTON */
+
+.back-btn {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1e59b7; /* same blue used in accordion active */
+    text-decoration: none;
+    margin-right: auto;
+    padding: 4px 6px;
+    transition: color .15s ease, transform .1s ease;
+}
+
+.back-btn:hover {
+    color: #2f73e0;
+    transform: translateX(-2px);
+}
+
+.back-btn:active {
+    transform: translateX(0);
+}
+
 /* COURSE HERO */
 
 .course-hero {
@@ -54,7 +75,6 @@
     width: 100%;
     height: 300px;
     object-fit: cover;
-    border-radius: 14px;
     box-shadow: 0 14px 30px rgba(30, 89, 183, 0.14);
 }
 
@@ -113,6 +133,18 @@
     border-radius: 9px;
     cursor: pointer;
     font-weight: 700;
+    transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+.save-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(30, 80, 40, 0.25);
+    filter: brightness(1.05);
+}
+
+.save-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(30, 80, 40, 0.2);
 }
 
 .cancel-button {
@@ -122,32 +154,42 @@
     text-decoration: none;
     color: #2b3742;
     font-weight: 600;
+    transition: transform .12s ease, box-shadow .12s ease, background .12s ease;
+}
+
+.cancel-button:hover {
+    background: #e1e6ee;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(23,33,41,0.12);
+}
+
+.cancel-button:active {
+    transform: translateY(0);
 }
 
 /* DESCRIPTION */
 
-.course-description {
-    margin-top: 26px;
-    padding: 16px 18px;
-    border: 1px solid var(--line);
-    border-radius: 14px;
-    background: linear-gradient(180deg, #ffffff, #fbfdff);
+.course-description{
+    margin: 32px 0;
+    padding-top: 24px;
+    padding-bottom: 24px;  /* add this */
+
+    border-top: 1px solid #e5e7eb;
+    border-bottom: 1px solid #e5e7eb;
 }
 
 .course-description h2 {
     margin: 0 0 10px 0;
-    font-size: 1.25rem;
+    font-size: 1.6rem;   /* bigger */
+    font-weight: 600;
     color: #1f4f9f;
 }
 
 .course-description p {
     margin: 0;
     color: var(--muted);
-    line-height: 1.6;
-
-    word-wrap: break-word;
+    line-height: 1.7;
     overflow-wrap: break-word;
-    word-break: break-word;
     max-width: 900px;
 }
 
@@ -173,7 +215,6 @@
 }
 
 /* TOPICS SECTION */
-
 .course-topics {
     margin-top: 30px;
 }
@@ -181,6 +222,8 @@
 .course-topics h2 {
     margin-bottom: 14px;
     color: #1f4f9f;
+    font-size: 1.6rem;
+    font-weight: 600;
 }
 
 /* ACCORDION */
@@ -309,6 +352,12 @@
 
 .topic.open .topic-content {
     display: block;
+}
+
+.empty-content {
+    padding: 18px;
+    color: var(--muted);
+    font-style: italic;
 }
 
 /* MOBILE */
