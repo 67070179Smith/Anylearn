@@ -18,9 +18,24 @@ body {
     color: var(--ink);
     background: linear-gradient(160deg, #f4f7fb 0%, var(--bg) 100%);
 }
+body.container {
+    max-width: 100%;
+    margin-top: 0 !important;
+    padding-left: 0;
+    padding-right: 0;
+    padding-bottom: 24px;
+}
+body.container > :not(.top) {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 12px;
+    padding-right: 12px;
+}
 
 .top {
     height: 80px;
+    width: 100%;
     background: linear-gradient(100deg, var(--blue-1), var(--blue-2));
     color: #fff;
     display: flex;
