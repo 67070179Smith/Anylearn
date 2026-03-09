@@ -44,4 +44,46 @@ router.get(
     teacherService.getCourses
 );
 
+router.post(
+  "/course/:id/edit",
+  upload.single("thumbnail"),
+  teacherService.updateCourse
+);
+
+router.post(
+  "/course/:id/topic",
+  teacherService.addTopic
+);
+
+router.post(
+  "/topic/:id/delete",
+  teacherService.deleteTopic
+);
+
+router.post(
+  "/topic/:id/content",
+  upload.single("image"),
+  teacherService.addContent
+);
+
+router.post(
+  "/content/:id/delete",
+  teacherService.deleteContent
+);
+
+router.post(
+  "/course/:courseId/student/:userId/remove",
+  teacherService.removeStudent
+);
+
+router.get(
+  "/feedback",
+  teacherService.getTeacherFeedback
+);
+
+router.post(
+  "/course/:id/delete",
+  teacherService.deleteCourse
+);
+
 module.exports = router;

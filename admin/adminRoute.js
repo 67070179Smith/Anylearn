@@ -148,5 +148,42 @@ router.post("/logout", (req, res) => {
     
 });
 
+router.post("/change-role/:id", (req, res) => {
+
+const userId = req.params.id
+const newRole = req.body.role
+
+if (newRole === "admin") {
+    return res.status(400).send("Cannot change role to admin");
+}
+
+    const sql = `
+    UPDATE users
+    SET role = ?
+    WHERE user_id = ? AND role != 'admin'
+    `
+
+    db.run(sql, [newRole, userId], (err) => {
+
+    if (err) {
+    console.log(err)
+    }
+
+    const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Changed role for user with ID ${userId} to ${newRole}`
+        ]);
+
+res.redirect("/admin")
+
+})
+
+})
 
 module.exports = router;

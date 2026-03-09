@@ -78,7 +78,7 @@ app.post("/guest", (req, res) => {
     req.session.user_id = null;
     req.session.username = "Guest";
     req.session.role = "guest";
-    res.redirect("/dashboard");
+    res.redirect("/browse");
 });
 
 app.get('/register', (req, res) => {
@@ -218,7 +218,6 @@ app.get('/dashboard', (req, res) => {
     if (!req.session.role) return res.redirect('/');
 
     const viewRole = req.session.role === "learner" ? "student" : req.session.role;
-
     const q = req.query.q || "";
 
     let sql;
@@ -227,13 +226,14 @@ app.get('/dashboard', (req, res) => {
     if (viewRole === "teacher") {
 
         if (q === "") {
-            // ต้องjoin ไม่ได้ใส่ชื่ออาจารย์ไว้
+
             sql = `
-            SELECT courses.*, users.username AS teacher_name
-            FROM courses
-            JOIN users ON courses.teacher_id = users.user_id
-            WHERE courses.teacher_id = ?
-    `;
+                SELECT courses.*, users.username AS teacher_name
+                FROM courses
+                JOIN users ON courses.teacher_id = users.user_id
+                WHERE courses.teacher_id = ?
+            `;
+
             params = [req.session.user_id];
 
         } else {
@@ -245,28 +245,30 @@ app.get('/dashboard', (req, res) => {
                 WHERE courses.teacher_id = ?
                 AND (courses.title LIKE ? OR courses.description LIKE ?)
             `;
+
             params = [
                 req.session.user_id,
                 `%${q}%`,
                 `%${q}%`
             ];
-
         }
 
     } else {
 
-        // สำหรับคอร์สที่นักเรียนสมัคร
-
         if (q === "") {
+
             sql = `
-            SELECT courses.*, users.username AS teacher_name
-            FROM enrollments
-            JOIN courses ON enrollments.course_id = courses.course_id
-            JOIN users ON courses.teacher_id = users.user_id
-            WHERE enrollments.user_id = ?
+                SELECT courses.*, users.username AS teacher_name
+                FROM enrollments
+                JOIN courses ON enrollments.course_id = courses.course_id
+                JOIN users ON courses.teacher_id = users.user_id
+                WHERE enrollments.user_id = ?
             `;
-            params = [];
+
+            params = [req.session.user_id];
+
         } else {
+
             sql = `
                 SELECT courses.*, users.username AS teacher_name
                 FROM enrollments
@@ -275,9 +277,13 @@ app.get('/dashboard', (req, res) => {
                 WHERE enrollments.user_id = ?
                 AND (courses.title LIKE ? OR courses.description LIKE ?)
             `;
-            params = [`%${q}%`, `%${q}%`];
-        }
 
+            params = [
+                req.session.user_id,
+                `%${q}%`,
+                `%${q}%`
+            ];
+        }
     }
 
     db.all(sql, params, (err, courses) => {
@@ -287,13 +293,48 @@ app.get('/dashboard', (req, res) => {
             return res.send("Database error");
         }
 
-        console.log(courses);
-        
-        res.render("dashboard", {
-            username: req.session.username || "Guest",
-            role: viewRole,
-            courses: courses,
-            query: q
+        // If not teacher → render normally
+        if (viewRole !== "teacher") {
+
+            return res.render("dashboard", {
+                username: req.session.username || "Guest",
+                role: viewRole,
+                courses: courses,
+                query: q,
+                feedbackList: []
+            });
+
+        }
+
+        // Teacher → also load feedback
+        const feedbackSQL = `
+            SELECT
+                feedback.text,
+                feedback.timestamp,
+                users.username,
+                courses.title AS course_title
+            FROM feedback
+            JOIN users ON feedback.user_id = users.user_id
+            JOIN courses ON feedback.course_id = courses.course_id
+            WHERE courses.teacher_id = ?
+            ORDER BY feedback.timestamp DESC
+        `;
+
+        db.all(feedbackSQL, [req.session.user_id], (err, feedbackRows) => {
+
+            if (err) {
+                console.error(err);
+                return res.send("Database error");
+            }
+
+            res.render("dashboard", {
+                username: req.session.username || "Guest",
+                role: viewRole,
+                courses: courses,
+                query: q,
+                feedbackList: feedbackRows
+            });
+
         });
 
     });
@@ -304,14 +345,14 @@ app.get("/course/:id", (req, res) => {
 
     const courseId = req.params.id;
 
-    const sql = `
+    const courseSQL = `
         SELECT courses.*, users.username AS teacher_name
         FROM courses
         JOIN users ON courses.teacher_id = users.user_id
         WHERE courses.course_id = ?
     `;
 
-    db.get(sql, [courseId], (err, course) => {
+    db.get(courseSQL, [courseId], (err, course) => {
 
         if (err) {
             console.error(err);
@@ -322,11 +363,241 @@ app.get("/course/:id", (req, res) => {
             return res.send("Course not found");
         }
 
-        res.render("course", {
-            course: course,
-            role: req.session.role,
-            username: req.session.username
+        const topicsSQL = `
+            SELECT 
+                topics.topic_id,
+                topics.title AS topic_title,
+                topics.topic_order,
+                contents.content_id,
+                contents.content_type,
+                contents.content_text,
+                contents.image_url,
+                contents.content_order
+            FROM topics
+            LEFT JOIN contents
+            ON topics.topic_id = contents.topic_id
+            WHERE topics.course_id = ?
+            ORDER BY topics.topic_order, contents.content_order
+        `;
+
+        db.all(topicsSQL, [courseId], (err, rows) => {
+
+            if (err) {
+                console.error(err);
+                return res.send("Database error");
+            }
+
+            const topics = {};
+
+            rows.forEach(row => {
+
+                if (!topics[row.topic_id]) {
+                    topics[row.topic_id] = {
+                        topic_id: row.topic_id,
+                        title: row.topic_title,
+                        contents: []
+                    };
+                }
+
+                if (row.content_id) {
+                    topics[row.topic_id].contents.push({
+                        content_id: row.content_id,
+                        content_type: row.content_type,
+                        content_text: row.content_text,
+                        image_url: row.image_url
+                    });
+                }
+
+            });
+
+            const topicsArray = Object.values(topics);
+
+            const role = req.session.role || "guest";
+            const userId = req.session.user_id;
+
+            if (!userId || role === "guest") {
+
+                return res.render("course", {
+                    course,
+                    topics: topicsArray,
+                    role,
+                    username: req.session.username,
+                    editMode: false,
+                    enrolled: false,
+                    students: []
+                });
+
+            }
+
+            const enrollSQL = `
+                SELECT 1
+                FROM enrollments
+                WHERE user_id = ?
+                AND course_id = ?
+            `;
+
+            db.get(enrollSQL, [userId, courseId], (err, row) => {
+
+                if (err) {
+                    console.error(err);
+                    return res.send("Database error");
+                }
+
+                const enrolled = !!row;
+
+                const studentsSQL = `
+                    SELECT users.user_id, users.username
+                    FROM enrollments
+                    JOIN users ON enrollments.user_id = users.user_id
+                    WHERE enrollments.course_id = ?
+                `;
+
+                db.all(studentsSQL, [courseId], (err, students) => {
+
+                    if (err) {
+                        console.error(err);
+                        return res.send("Database error");
+                    }
+
+                    res.render("course", {
+                        course,
+                        topics: topicsArray,
+                        role,
+                        username: req.session.username,
+                        editMode: false,
+                        enrolled,
+                        students
+                    });
+
+                });
+
+            });
+
         });
+
+    });
+
+});
+
+app.get("/course/:id/edit", (req, res) => {
+
+    const courseId = req.params.id;
+
+    if (req.session.role !== "teacher") {
+        return res.redirect("/course/" + courseId);
+    }
+
+    const courseSQL = `
+        SELECT courses.*, users.username AS teacher_name
+        FROM courses
+        JOIN users ON courses.teacher_id = users.user_id
+        WHERE courses.course_id = ?
+    `;
+
+    db.get(courseSQL, [courseId], (err, course) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Database error");
+        }
+
+        if (!course) {
+            return res.send("Course not found");
+        }
+
+        const topicSQL = `
+            SELECT *
+            FROM topics
+            WHERE course_id = ?
+            ORDER BY topic_order
+        `;
+
+        db.all(topicSQL, [courseId], (err, topics) => {
+
+            if (err) {
+                console.error(err);
+                return res.send("Database error");
+            }
+
+            if (topics.length === 0) {
+                return res.render("course", {
+                    course,
+                    topics: [],
+                    role: req.session.role,
+                    username: req.session.username,
+                    editMode: true,
+                    students: []
+                });
+            }
+
+            const topicIds = topics.map(t => t.topic_id);
+
+            const contentSQL = `
+                SELECT *
+                FROM contents
+                WHERE topic_id IN (${topicIds.map(() => "?").join(",")})
+                ORDER BY content_order
+            `;
+
+            db.all(contentSQL, topicIds, (err, contents) => {
+
+                if (err) {
+                    console.error(err);
+                    return res.send("Database error");
+                }
+
+                const topicMap = {};
+
+                topics.forEach(topic => {
+                    topic.contents = [];
+                    topicMap[topic.topic_id] = topic;
+                });
+
+                contents.forEach(content => {
+                    if (topicMap[content.topic_id]) {
+                        topicMap[content.topic_id].contents.push(content);
+                    }
+                });
+
+                res.render("course", {
+                    course,
+                    topics,
+                    role: req.session.role,
+                    username: req.session.username,
+                    editMode: true,
+                    students: []
+                });
+
+            });
+
+        });
+
+    });
+
+});
+
+app.post("/course/:id/enroll", (req, res) => {
+
+    if (!req.session.user_id) {
+        return res.redirect("/register");
+    }
+
+    const userId = req.session.user_id;
+    const courseId = req.params.id;
+
+    const sql = `
+        INSERT OR IGNORE INTO enrollments (user_id, course_id)
+        VALUES (?, ?)
+    `;
+
+    db.run(sql, [userId, courseId], (err) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Enrollment failed");
+        }
+
+        res.redirect("/course/" + courseId);
 
     });
 
@@ -379,6 +650,88 @@ app.post('/editprofile', (req,res)=>{
             res.redirect('/profile');
         }
     );
+});
+
+app.get("/browse", (req, res) => {
+
+    if (!req.session.role) {
+        return res.redirect("/");
+    }
+
+    const q = req.query.q || "";
+
+    let sql;
+    let params;
+
+    if (q === "") {
+
+        sql = `
+            SELECT courses.*, users.username AS teacher_name
+            FROM courses
+            JOIN users ON courses.teacher_id = users.user_id
+            ORDER BY courses.created_at DESC
+        `;
+
+        params = [];
+
+    } else {
+
+        sql = `
+            SELECT courses.*, users.username AS teacher_name
+            FROM courses
+            JOIN users ON courses.teacher_id = users.user_id
+            WHERE courses.title LIKE ? OR courses.description LIKE ?
+            ORDER BY courses.created_at DESC
+        `;
+
+        params = [`%${q}%`, `%${q}%`];
+
+    }
+
+    db.all(sql, params, (err, courses) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Database error");
+        }
+
+        res.render("browse", {
+            username: req.session.username || "Guest",
+            role: req.session.role,
+            courses: courses,
+            query: q
+        });
+
+    });
+
+});
+
+app.post("/course/:id/feedback", (req, res) => {
+
+    if (!req.session.user_id) {
+        return res.redirect("/register");
+    }
+
+    const courseId = req.params.id;
+    const userId = req.session.user_id;
+    const text = req.body.text;
+
+    const sql = `
+        INSERT INTO feedback (course_id, user_id, text)
+        VALUES (?, ?, ?)
+    `;
+
+    db.run(sql, [courseId, userId, text], (err) => {
+
+        if (err) {
+            console.error(err);
+            return res.send("Failed to send feedback");
+        }
+
+        res.redirect("/course/" + courseId);
+
+    });
+
 });
 
 app.listen(port, () => {

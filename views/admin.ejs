@@ -84,9 +84,9 @@ value="<%= user_search %>"
 <th>ID</th>
 <th>ชื่อผู้ใช้</th>
 <th>อีเมล</th>
-<th>ประเภท</th>
+<th>บทบาท</th>
 <th>วันที่สร้าง</th>
-<th>ลบ</th>
+<th>แก้ไข</th>
 </tr>
 </thead>
 
@@ -98,12 +98,50 @@ value="<%= user_search %>"
 <td><%= user.user_id %></td>
 <td><%= user.username %></td>
 <td><%= user.email %></td>
-<td><%= user.role %></td>
+<td>
+
+<% if(user.role === "admin") { %>
+
+<span class="badge bg-dark">Admin</span>
+
+<% } else { %>
+
+<form action="/admin/change-role/<%= user.user_id %>" method="POST" class="d-flex gap-2">
+
+<select name="role" class="form-select form-select-sm">
+
+<option value="learner" <%= user.role === "learner" ? "selected" : "" %>>
+Learner
+</option>
+
+<option value="teacher" <%= user.role === "teacher" ? "selected" : "" %>>
+Teacher
+</option>
+
+</select>
+
+<button class="btn btn-warning btn-sm" onclick="alert('Role updated!')">Change</button>
+
+</form>
+
+<% } %>
+
+</td>
 <td><%= user.created_at %></td>
 <td>
+
+<% if(user.role !== "admin") { %>
+
 <form action="/admin/delete/<%= user.user_id %>" method="POST">
 <button class="btn btn-danger btn-sm">Delete</button>
 </form>
+
+<% } else { %>
+
+<span class="text-muted">Locked</span>
+
+<% } %>
+
 </td>
 </tr>
 

@@ -97,12 +97,29 @@ db.run(usersCreateSQL, (err) => {
                             user_id INTEGER,
                             username TEXT,
                             action TEXT NOT NULL,
-                            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                            created_at DATETIME DEFAULT (datetime('now','localtime')),
                             FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE SET NULL
                             );`;
                     db.run(createLogs, (err) => {
                         if (err) throw err;
                         console.log("Activity logs table created");
+
+                    const feedbackCreateSQL = `
+                            CREATE TABLE IF NOT EXISTS feedback (
+                            feedback_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                            course_id INTEGER NOT NULL,
+                            user_id INTEGER NOT NULL,
+                            text TEXT NOT NULL,
+                            timestamp DATETIME DEFAULT (datetime('now','localtime')),
+                            FOREIGN KEY (course_id) REFERENCES courses(course_id) ON DELETE CASCADE,
+                            FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE CASCADE
+                            );
+                        `;
+
+                        db.run(feedbackCreateSQL, (err) => {
+                            if (err) throw err;
+                            console.log("Feedback table created");
+                        });
                     });
                 });
             });
