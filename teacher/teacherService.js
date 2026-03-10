@@ -35,7 +35,7 @@ function createCourse(req, res) {
         db.run(log, [
             req.session.user_id,
             req.session.username,
-            `Created course with ID ${courseId}`
+            `Teacher ${req.session.username} created course `
         ]);
         
         res.redirect("/dashboard");
