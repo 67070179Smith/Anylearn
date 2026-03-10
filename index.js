@@ -728,6 +728,17 @@ app.post("/course/:id/feedback", (req, res) => {
             return res.send("Failed to send feedback");
         }
 
+        const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Sent feedback for course with ID ${courseId}`
+        ]);
+
         res.redirect("/course/" + courseId);
 
     });

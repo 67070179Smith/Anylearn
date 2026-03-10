@@ -27,6 +27,17 @@ function createCourse(req, res) {
             return res.send("Database error");
         }
 
+        const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Created course with ID ${courseId}`
+        ]);
+        
         res.redirect("/dashboard");
     });
 }
@@ -132,6 +143,17 @@ function updateCourse(req, res) {
             console.error(err);
             return res.send("Database error");
         }
+
+        const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Updated course with ID ${courseId}`
+        ]);
 
         res.redirect(`/course/${courseId}`);
     });
@@ -301,6 +323,7 @@ function addContent(req, res) {
                     return res.send("Error adding content");
                 }
 
+                
                 res.redirect("/course/" + req.body.course_id + "/edit#topicsAccordion");
 
             }
@@ -387,6 +410,17 @@ function removeStudent(req, res) {
       return res.send("Database error");
     }
 
+    const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Removed student with ID ${userId}`
+        ]);
+
     res.redirect("/course/" + courseId);
 
   });
@@ -453,6 +487,17 @@ function deleteCourse(req, res) {
     if (this.changes === 0) {
       return res.send("Course not found or unauthorized");
     }
+
+    const log = `
+            INSERT INTO activity_logs (user_id, username, action)
+            VALUES (?, ?, ?)
+        `;
+
+        db.run(log, [
+            req.session.user_id,
+            req.session.username,
+            `Deleted course with ID ${courseId}`
+        ]);
 
     res.redirect("/dashboard");
 
