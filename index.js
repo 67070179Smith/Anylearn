@@ -217,7 +217,7 @@ app.get('/dashboard', (req, res) => {
 
     if (!req.session.role) return res.redirect('/');
 
-    const viewRole = req.session.role //=== "learner" ? "student" : req.session.role;
+    const viewRole = req.session.role ;
     const q = req.query.q || "";
 
     let sql;
